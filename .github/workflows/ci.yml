@@ -50,7 +50,7 @@ jobs:
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
       - name: Install dependencies
-        run: cd frontend && npm ci
+        run: cd frontend && npm install --prefer-offline
       - name: Run tests with coverage
         run: cd frontend && npm run test:coverage
       - name: Upload coverage report
@@ -71,7 +71,7 @@ jobs:
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
       - name: Install dependencies
-        run: cd frontend && npm ci
+        run: cd frontend && npm install --prefer-offline
       - name: Install Maven
         run: |
           curl -fsSL https://archive.apache.org/dist/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz -o /tmp/maven.tar.gz
@@ -115,7 +115,7 @@ jobs:
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
       - name: Install dependencies
-        run: cd frontend && npm ci
+        run: cd frontend && npm install --prefer-offline
       - name: Install Playwright browsers
         run: cd frontend && npx playwright install --with-deps chromium
       - name: Start dev server
