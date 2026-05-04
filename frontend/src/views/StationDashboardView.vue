@@ -23,7 +23,7 @@ onMounted(async () => {
   try {
     const { data } = await axios.get('/api/station/dashboard')
     stats.value = data.stats || stats.value
-  } catch {}
+  } catch { /* ignore */ }
 })
 </script>
 

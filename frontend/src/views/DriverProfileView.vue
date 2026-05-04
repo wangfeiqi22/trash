@@ -42,7 +42,7 @@ onMounted(async () => {
   try {
     const { data } = await axios.get('/api/driver/profile')
     stats.value = data.stats || stats.value
-  } catch {}
+  } catch { /* ignore */ }
 })
 
 function handleLogout() {

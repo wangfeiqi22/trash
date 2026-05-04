@@ -1,18 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import LoginView from '../LoginView.vue'
-import { createRouter, createWebHistory } from 'vue-router'
 
 vi.mock('@/api', () => ({ default: { post: vi.fn() } }))
 
 const mockRouter = {
   push: vi.fn().mockResolvedValue(undefined),
 }
-
-const router = createRouter({
-  history: createWebHistory(),
-  routes: [{ path: '/home', name: 'Home' }]
-})
 
 describe('LoginView', () => {
   it('renders login form', () => {

@@ -136,8 +136,9 @@ jobs:
       - name: Run E2E tests
         run: |
           cd frontend
-          if [ ! "$(ls -A tests/e2e 2>/dev/null)" ]; then
-            echo "⚠️  No E2E tests found in tests/e2e/. Skipping."
+          mkdir -p tests/e2e
+          if ! ls tests/e2e/*.spec.js tests/e2e/*.test.js 1>/dev/null 2>&1; then
+            echo "⚠️  No E2E test files found. Skipping."
           else
             npm run test:e2e
           fi

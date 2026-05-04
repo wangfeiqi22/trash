@@ -35,7 +35,7 @@ onMounted(async () => {
   try {
     const { data } = await axios.get('/api/mall/products')
     products.value = data || []
-  } catch {}
+  } catch { /* ignore */ }
 })
 
 function exchange(product) {

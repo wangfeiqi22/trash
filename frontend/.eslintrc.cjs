@@ -16,6 +16,7 @@ module.exports = {
     'vue/multi-word-component-names': 'off',
     'vue/no-v-html': 'warn',
     'no-unused-vars': 'warn',
-    'no-console': 'off'
+    'no-console': 'off',
+    'no-empty': 'off'
   }
 }
