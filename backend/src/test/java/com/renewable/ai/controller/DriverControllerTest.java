@@ -30,11 +30,19 @@ public class DriverControllerTest {
     private OrderService orderService;
 
     @MockBean
+    private com.renewable.ai.repository.UserRepository userRepository;
+
+    @MockBean
     private com.renewable.ai.interceptor.AuthenticationInterceptor authenticationInterceptor;
 
     @org.junit.jupiter.api.BeforeEach
     public void setUp() throws Exception {
         when(authenticationInterceptor.preHandle(any(), any(), any())).thenReturn(true);
+        com.renewable.ai.entity.User adminUser = new com.renewable.ai.entity.User();
+        adminUser.setId(1L);
+        adminUser.setRole("admin");
+        when(userRepository.findById(1L)).thenReturn(java.util.Optional.of(adminUser));
+        when(userRepository.findById(999L)).thenReturn(java.util.Optional.of(adminUser));
     }
 
     @Test
@@ -47,6 +55,7 @@ public class DriverControllerTest {
                 .thenReturn(page);
 
         mockMvc.perform(get("/api/driver/task/history")
+                        .requestAttr("userId", 1L)
                         .param("driverId", "1")
                         .param("startDate", "2023-01-01T00:00:00Z")
                         .param("endDate", "2023-01-31T23:59:59Z"))
@@ -65,6 +74,7 @@ public class DriverControllerTest {
                 .thenReturn(page);
 
         mockMvc.perform(get("/api/driver/task/history")
+                        .requestAttr("userId", 1L)
                         .param("driverId", "1")
                         .param("page", "0")
                         .param("pageSize", "10"))
@@ -81,6 +91,7 @@ public class DriverControllerTest {
                 .thenReturn(emptyPage);
 
         mockMvc.perform(get("/api/driver/task/history")
+                        .requestAttr("userId", 999L)
                         .param("driverId", "999")
                         .param("page", "0")
                         .param("pageSize", "10"))

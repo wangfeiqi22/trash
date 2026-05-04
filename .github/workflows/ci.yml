@@ -78,7 +78,7 @@ jobs:
           tar -xzf /tmp/maven.tar.gz -C /opt
           echo "/opt/apache-maven-3.9.6/bin" >> $GITHUB_PATH
       - name: ESLint
-        run: cd frontend && npx eslint src --max-warnings 0
+        run: cd frontend && npm run lint
       - name: Backend compile check
         run: cd backend && mvn compile -q
 
@@ -118,6 +118,18 @@ jobs:
         run: cd frontend && npm ci
       - name: Install Playwright browsers
         run: cd frontend && npx playwright install --with-deps chromium
+      - name: Start dev server
+        run: cd frontend && npm run dev &
+      - name: Wait for dev server to be ready
+        run: |
+          for i in {1..30}; do
+            if curl -s http://localhost:5173 > /dev/null 2>&1; then
+              echo "Dev server is ready"
+              break
+            fi
+            echo "Waiting for dev server... ($i/30)"
+            sleep 2
+          done
       - name: Run E2E tests
         run: cd frontend && npm run test:e2e
         env:
