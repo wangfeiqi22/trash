@@ -1,0 +1,126 @@
+name: CI — Smart Waste System
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  backend-test:
+    name: Backend Tests (Spring Boot + Coverage)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+      - name: Install Maven
+        run: |
+          curl -fsSL https://archive.apache.org/dist/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz -o /tmp/maven.tar.gz
+          tar -xzf /tmp/maven.tar.gz -C /opt
+          echo "/opt/apache-maven-3.9.6/bin" >> $GITHUB_PATH
+      - name: Run tests with coverage
+        run: cd backend && mvn test -Dspring.profiles.active=test
+        env:
+          SPRING_PROFILES_ACTIVE: test
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/target/site/jacoco/index.html
+
+  frontend-test:
+    name: Frontend Tests (Vitest + Coverage Gate 40%)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        run: cd frontend && npm ci
+      - name: Run tests with coverage
+        run: cd frontend && npm run test:coverage
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: frontend/coverage/index.html
+
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        run: cd frontend && npm ci
+      - name: Install Maven
+        run: |
+          curl -fsSL https://archive.apache.org/dist/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz -o /tmp/maven.tar.gz
+          tar -xzf /tmp/maven.tar.gz -C /opt
+          echo "/opt/apache-maven-3.9.6/bin" >> $GITHUB_PATH
+      - name: ESLint
+        run: cd frontend && npx eslint src --max-warnings 0
+      - name: Backend compile check
+        run: cd backend && mvn compile -q
+
+  no-hardcoded-secrets:
+    name: No Hardcoded Secrets Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan for hardcoded secrets
+        run: |
+          if grep -r "password\s*=\s*['\"][^'\"{]" --include="*.java" backend/src/main/java; then
+            echo "❌ Found hardcoded password in Java files"
+            exit 1
+          fi
+          if grep -r "apiKey\s*=\s*['\"][^'\"{]" --include="*.java" backend/src/main/java; then
+            echo "❌ Found hardcoded apiKey in Java files"
+            exit 1
+          fi
+          if grep -r "console\.\(log\|error\|warn\)" --include="*.vue" frontend/src/views frontend/src/components frontend/src/utils frontend/src/stores frontend/src/router frontend/src/api.js frontend/src/main.js 2>/dev/null; then
+            echo "❌ Found console.* calls in frontend source files"
+            exit 1
+          fi
+          echo "✅ No hardcoded secrets detected"
+
+  frontend-e2e:
+    name: Frontend E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        run: cd frontend && npm ci
+      - name: Install Playwright browsers
+        run: cd frontend && npx playwright install --with-deps chromium
+      - name: Run E2E tests
+        run: cd frontend && npm run test:e2e
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:5173
+          E2E_TEST_USERNAME: ${{ secrets.E2E_TEST_USERNAME }}
+          E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}

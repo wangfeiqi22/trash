@@ -1,0 +1,23 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ai-customer-service
+  datasource:
+    url: jdbc:postgresql://db:5432/ai_customer_service
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+# Custom configuration for AI Service
+ai:
+  api-url: http://mock-ai-service/api # Placeholder for external AI service

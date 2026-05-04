@@ -1,0 +1,28 @@
+# Recovered data
+.recovered_blobs/
+
+# Backend
+backend/logs/
+backend/target/
+backend/*.log
+
+# Frontend
+frontend/dist/
+frontend/node_modules/
+frontend/playwright-report/
+frontend/test-results/
+frontend/coverage/
+frontend/*.log
+
+# Maven
+.mvn/wrapper/
+.mvn/cache/
+
+# IDE & OS
+.DS_Store
+.idea/
+*.iml
+
+# Logs
+*.log
+logs/
