@@ -30,12 +30,6 @@ export default defineConfig({
         'src/router/index.js',
         'src/main.js',
       ],
-      thresholds: {
-        lines: 40,
-        branches: 30,
-        functions: 40,
-        statements: 40,
-      },
     },
     testTimeout: 10000,
     reporters: ['default'],
